@@ -1,0 +1,625 @@
+---
+title: "STAT443 Forecasting - Assignment 3"
+author: "Christopher Risi - Group B - 20239762"
+date: "July 5, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1 Theory
+### Problem 1 
+_Consider the AR(1) model:_ $Y_t = \phi Y_{t-1} + a_t$ _, where_ $a_t \sim i.i.N.[0, \sigma^2]$*. Suppose you have the following data*:
+
+$$\sum Y_t Y_{t-1} = 800, \hspace{0.5cm} \sum Y^2_{t-1} = 1000 \hspace{0.25cm} and \hspace{0.25cm} \sum \hat{a}_t = 60$$
+_Show that the estimated model resulting from applying the least squares method is stationary. Use the asymptotic distributino of the least squares estimator_
+
+\begin{equation}
+\hat{\phi}_{OLS} \overset{asy}{\sim} N\Big[\phi, \hat{\sigma} \frac{1}{\Sigma Y^2_{t-1}}\Big]
+\end{equation}
+
+_to construct an approximate 95% confidence interval for the true population coefficient $\phi$ and explain its meaning.  You can assume an effective sample size of 100 observations._
+
+Consider immediately that we are solving for $Y_t = \phi Y_{t-1} + a_t$, so if we are solving for the standard OLS regression of the form $\hat{Y}_t = \hat{\beta}_1 +   \hat{\beta}_2 X_{t} + \hat{a}_t$ we know that $\hat{\beta}_1 = 0$ and $\hat{\beta}_2 = \phi$.
+
+Therefore we have that: 
+\begin{equation}
+\begin{aligned}
+\beta_1 = 0 &= \bar{Y}_t - \hat{\beta}_2 \bar{Y}_{t-1} \\
+\bar{Y}_t &=  \hat{\beta}_2 \bar{Y}_{t-1} \\
+\end{aligned}
+\end{equation}
+
+and
+
+\begin{equation}
+\begin{aligned}
+\phi = \hat{\beta}_2 &= \frac{\sum(Y_{t-1} - \bar{Y}_{t-1})(Y_t-\bar{Y}_{t})}{\sum(Y_{t-1} - \bar{Y}_{t-1})^2} \\
+\hat{\beta}_2 &= \frac{\sum Y_{t-1}Y_t - 100\bar{Y}_t \bar{Y}_{t-1}}{\sum Y^2_{t-1} - 100 \bar{Y}_{t-1}^2} \\
+\hat{\beta}_2 &= \frac{800 - 100\bar{Y}_t \bar{Y}_{t-1}}{1000 - 100 \bar{Y}_{t-1}^2} \\
+\hat{\beta}_2 &= \frac{800 - 100 (\hat{\beta}_2 \bar{Y}_{t-1}) \bar{Y}_{t-1}}{1000 - 100 \bar{Y}_{t-1}^2} \\
+\hat{\beta}_2 (1000 - 100 \bar{Y}_{t-1}^2) &= 800 - 100 \hat{\beta}_2 \bar{Y}_{t-1}^2\\
+1000 \hat{\beta}_2 &= 800 \\
+\hat{\phi} = \hat{\beta}_2 &= 0.8 \\
+\end{aligned}
+\end{equation}
+
+
+Following the above derived information we also have that:
+
+$$var(\hat{\phi}_{OLS}) = \hat{\sigma}^2 \frac{1}{\sum{y^2_{t-1}}}$$ 
+
+where 
+
+$$\hat{\sigma}^2 = RSS/n = 60/100 = 0.6$$
+
+so 
+
+$$var(\hat{\phi}_{OLS}) = \frac{0.6}{1000} = 0.0006$$
+
+Finally:
+\begin{equation}
+\begin{aligned}
+0.95 \approx Pr \Big(\hat{\phi} - 1.96 \sqrt{var(\hat{\phi}_{OLS})} < \phi < \hat{\phi} + 1.96 \sqrt{var(\hat{\phi}_{OLS})} \Big) \\
+0.95 \approx Pr \Big(0.8 - 1.96 \sqrt{0.0006} < \phi < 0.8 + 1.96 \sqrt{0.0006} \Big) \\
+0.95 \approx Pr \Big( 0.75199 < \phi < 0.84801 \Big) \\
+\end{aligned}
+\end{equation}
+
+We are 95% certain that the interval $(0.75199,0.84801)$ contains the true unknown $\phi$.
+
+
+### Problem 2
+_Consider the estimated AR(2) model_
+
+$$Y_t = 0.049 Y_{t-1} + 0.22 Y_{t-2} + \hat{a}_t$$.
+
+_Perform a simple t-test to test the significance of_ $Y_{t-2}$. _Assume the effective sample size is 164._
+
+Using the following formulas:
+
+$$\sqrt{n} \Bigg( \begin{bmatrix} \hat{\phi}_1 \\ \hat{\phi}_2 \end{bmatrix}  - \begin{bmatrix} \phi_1 \\ \phi_2 \end{bmatrix} \Bigg) \overset{asy}{\sim} N\Bigg(\begin{bmatrix} 0 \\ 0 \end{bmatrix} , \begin{bmatrix} 1-\phi_2^2 && - \phi_1(1+\phi_2) \\ - \phi_1(1+\phi_2) &&  1-\phi_2^2  \end{bmatrix} \Bigg) $$
+$$ \Bigg( \begin{bmatrix} \hat{\phi}_1 \\ \hat{\phi}_2 \end{bmatrix}  \Bigg) \overset{asy}{\sim} N\Bigg(\begin{bmatrix} \phi_1 \\ \phi_2 \end{bmatrix} , \begin{bmatrix} \frac{1-\phi_2^2}{n} && \frac{- \phi_1(1+\phi_2)}{n} \\ \frac{- \phi_1(1+\phi_2)}{n} &&  \frac{1-\phi_2^2}{n}  \end{bmatrix} \Bigg) $$
+
+Using the above formulas we need to perform a t-test, which tests the following hypothesis:
+
+Test $H_0: \hspace{0.1cm} \phi_2 = 0$ versus $H_1: \hspace{0.1cm} \phi_2 \ne 0$
+
+Our t-statistic is defined as $t_{stat} = \frac{\hat{\phi_2 - \phi_2}}{SE[\hat\phi_2]}$ and our critical t-value is $t_{crit}(\alpha = 5\%, 2-sided, df=164) = 1.974535 \approx 2$.
+
+$$t_{stat} = \frac{0.22 - 0}{\sqrt{(1-0.22^2)/164}} = \frac{0.22}{0.07617374} = 2.888134 $$
+
+Since $t_{stat} > t_{crit} => 2.888134 > 1.974535$ we reject $H_0$ at the 5% significance level.
+
+### Problem 3
+_Consider the quartery seasonally adjusted Canadian Personal Expenditure on Consumer Goods and Services raw time series that you used in Assignment 1.  The data range covers teh first quarter of the year 1961 till the first quarter of 2007, i.e., 185 observations.  Define_ $X_t = ln W_t$. _Extract the cycle_ $Y_t$ _using the TS approach and fit the following AR(2) model to it_:
+
+
+$$Y_t = \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + a_t, \hspace{0.5cm} a_t \sim i.i.N[0,\sigma^2]$$
+_Suppose/verify that you obtained the following estimated model_
+
+$$\hat{Y}_t = \underset{(0.0741)}{0.98}Y_{t-1} - \underset{(0.0731)}{0.006}Y_{t-2} + \hat{a}_t; \hspace{0.5cm} \sum\hat{a}^2_t = 0.0136100383$$
+_where the figures in the brackets are the corresponding standard errors.  Verify that the asymptotic least squares estimator of_ $\sigma^2$ _is_ $0.000074$.  _Construct an approximate 95% confidence interval for_ $\phi_1$. _Perform a test of significance for each individual coefficient.  Test the restriction that_ $\phi_1 + \phi_2 = 1$.
+
+#### Verify that the asymptotic least squares estimator of_ $\sigma^2$ _is_ $0.000074$.
+
+\begin{equation}
+\begin{aligned}
+\hat\sigma^2 &= RSS/n \\
+\hat\sigma^2 &= \frac{\sum \hat{a}^2_t}{n} = \frac{0.0136100383}{185} = 0.000074
+\end{aligned}
+\end{equation}
+
+#### Construct an approximate 95% confidence interval for $\phi_1$
+
+
+$$\hat\phi_1 = 0.98$$
+$$SE[\hat\phi_1] = 0.0741 $$
+
+\begin{equation}
+\begin{aligned}
+0.95 \approx Pr \Big(\hat{\phi} - 1.96 SE[\hat\phi_1] < \phi_1 < \hat{\phi} + 1.96 SE[\hat\phi_1] \Big) \\
+0.95 \approx Pr \Big(0.98 - 1.96(0.0741) < \phi < 0.98 + 1.96(0.0741) \Big) \\
+0.95 \approx Pr \Big( 0.834764 < \phi < 1.125236 \Big) \\
+\end{aligned}
+\end{equation}
+
+We are 95% certain that the interval $(0.834764,1.125236)$ contains the true unknown $\phi_1$.
+
+#### Perform a test of significance for each individual coefficient
+
+#####$\phi_1$
+
+Test $H_0: \hspace{0.1cm} \phi_1 = 0$ versus $H_1: \hspace{0.1cm} \phi_1 \ne 0$
+
+Our t-statistic is defined as $t_{stat} = \frac{\hat{\phi_1 - \phi_1}}{SE[\hat\phi_1]}$ and our critical t-value is $t_{crit}(\alpha = 5\%, 2-sided, df=185) = 1.97287 \approx 2$.
+
+$$t_{stat} = \frac{0.98 - 0}{0.0741} = \frac{0.98}{0.0741} =  13.22537 $$
+
+Since $t_{stat} > t_{crit} => |13.22537| > 1.97287$ we reject $H_0$ at the 5% significance level.
+
+#####$\phi_2$
+
+Test $H_0: \hspace{0.1cm} \phi_2 = 0$ versus $H_1: \hspace{0.1cm} \phi_2 \ne 0$
+
+Our t-statistic is defined as $t_{stat} = \frac{\hat{\phi_2} - \phi_2}{SE[\hat\phi_2]}$ and our critical t-value is $t_{crit}(\alpha = 5\%, 2-sided, df=185) = 1.97287 \approx 2$.
+
+$$t_{stat} = \frac{-0.006 - 0}{0.0731} = \frac{-0.006}{0.0731} =  -0.08207934 $$
+
+Since $t_{stat} < t_{crit} => |-0.08207934| < 1.97287$ we do not reject $H_0$ at the 5% significance level.
+
+##### Test the restriction that $\phi_1 + \phi_2 = 1$
+Test $H_0: \hspace{0.1cm} \phi_1 + \phi_2 = 1$ versus $H_1: \hspace{0.1cm} \phi_1 + \phi_2 \ne 1$
+
+Our t-statistic is defined as $t_{stat} = \frac{\hat{\phi_1 + \phi_2} - (\phi_1 + \phi_2)}{SE[\hat{\phi_1 + \phi_2}]}$ and our critical t-value is $t_{crit}(\alpha = 5\%, 2-sided, df=185) = 1.97287 \approx 2$.
+
+$$t_{stat} = \frac{0.974 - 1}{\sqrt{2*0.0054056 + 2*-0.005265514 }} = \frac{-0.026}{0.01673834} =  -1.55332 $$
+Since $t_{stat} < t_{crit} => |-1.55332| < 1.97287$ we do not reject $H_0$ at the 5% significance level.
+
+### Problem 4
+_Consider the AR(2) model_:
+
+$$Y_t = \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + a_t, \hspace{0.5cm} a_t \sim i.i.N[0,\sigma^2]$$
+
+_where the parameter vector_ $\theta' = (\phi_1, \phi_2, \sigma^2) \in \Theta$, _and_ $\Theta$ _is the parameter space. Based on an effective sample_ $S_n$ _of size n given as_
+
+$$S_n = \{Y_n, Y_{n-1}, ..., Y_1, Y_0, Y_{-1}\}$$
+_where_ $Y_0$ and $Y_{-1}$ _are the starting values, i.e., the information set_ $I_0 = \{Y_0, Y_{-1}\}$. _Show that the approximate log-likelihood function is_
+
+$$ l(\theta) = -\frac{n}{2} ln(\sigma^2) - \frac{1}{2\sigma^2}\sum_{t=1}^{n} (Y_t - \phi_1 Y_{t-1} - \phi_2 Y_{t-2})^2$$
+_Use_ $l(\theta)$ _to derive expressions for the asymptotic maximum likelihood estimators_ $(\hat{\phi}_1)_{ML}$, $(\hat{\phi}_2)_{ML}$, and $(\hat{\sigma}^2)_{ML}$. _Show that_
+
+$$\sqrt{n} \Bigg( \begin{bmatrix} (\hat{\phi}_1)_{ML} \\ (\hat{\phi}_2)_{ML} \end{bmatrix}  - \begin{bmatrix} \phi_1 \\ \phi_2 \end{bmatrix} \Bigg) \overset{asy}{\sim} N\Bigg(\begin{bmatrix} 0 \\ 0 \end{bmatrix} , \begin{bmatrix} 1-\phi_2^2 && - \phi_1(1+\phi_2) \\ - \phi_1(1+\phi_2) &&  1-\phi_2^2  \end{bmatrix} \Bigg) $$
+
+Our objective is to find the joint density of the sequence $\{Y_t\}^n_{t=1}$.
+
+We cannot use the product of a marginal distribution though because the lags of an AR model are correlated.  Instead we will use conditional probability from Bayes Theorem.  I.e. $P(A,B) = P(A|B)P(B)$.
+
+If our sample set $S_n$ is given as:
+$$S_n = \{Y_n, Y_{n-1}, ..., Y_1, Y_0, Y_{-1}\}$$
+Then define $S_{n-1} = \{Y_{n-1}, ..., Y_1, Y_0, Y_{-1}\}$,  and this pattern should hold for all $n$ until $S_0$.
+
+Combining this with Bayes Theorem and Recursive Substitution we have that:
+
+\begin{equation}
+\begin{aligned}
+f(Y_n , S_{n-1}) &= f(Y_n | S_{n-1})f(S_{n-1}) \\
+f(Y_n , S_{n-1}) &= f(Y_n | S_{n-1})f(Y_{n-1} | S_{n-2})f(S_{n-2}) \\
+f(Y_n , S_{n-1}) &= f(Y_n | S_{n-1})f(Y_{n-1} | S_{n-2}) f(Y_{n-2} | S_{n-3})f(S_{n-3}) \\
+&... \\
+f(Y_n , S_{n-1}) &= f(Y_n | S_{n-1})f(Y_{n-1} | S_{n-2})f(Y_{n-2} | S_{n-3}) \cdot ... \cdot f(Y_{1} | S_{0})f(S_{0}) \\
+\end{aligned}
+\end{equation}
+
+Where $f(S_{0})$ is the density of the starting values.
+
+Since $a_t \sim N[0, \sigma^2]$, then by _Gaussian Law_ and since the first 2 values of AR(2) are known, $Y_t \overset{asy}{\sim} N$.
+
+-> $Y_t |_{S_{t -1} = \{Y_{t-1},Y_{t-2}\}} \sim N[\phi_1 Y_{t-1} + \phi_2 Y_{t-2}, \sigma^2]$
+
+and
+
+
+-> $f(Y_t | S_{t-1}) = \frac{1}{\sqrt{2\pi \sigma^2}} exp\Big\{-\frac{1}{2\sigma^2} a^2_t \Big\}$ for any $t$.
+
+We now have that:
+
+$f(Y_n, Y_{n-1}, ..., Y_1 ; Y_0, Y_{-1} | \theta) = (2\pi \sigma^2)^{-n/2} \cdot exp\Big\{-\frac{1}{2\sigma^2} \sum a^2_t  \Big\} \cdot f(S_0)$ is the joint density function of $Y_t$
+
+Define $L(\theta | Y_n, Y_{n-1}, ..., Y_1 ; Y_0, Y_{-1}) = (2\pi \sigma^2)^{-n/2} \cdot exp\Big\{-\frac{1}{2\sigma^2} \sum a^2_t  \Big\} \cdot f(S_0)$ as the likelihood function.
+
+Since $ln(x)$ is a globally increasing function of $x$, we can:
+
+$$arg \hspace{0.1cm} max \hspace{0.1cm} l(\cdot) = log L(\cdot)$$
+<--> $$arg \hspace{0.1cm} max \hspace{0.1cm} l(\cdot) = \frac{n}{2} log(2 \pi) - \frac{n}{2}log(\sigma^2) - \frac{1}{2\sigma^2}\sum a^2_t + log(f(S_0))$$
+
+* $\frac{n}{2} log(2 \pi)$ is a constant
+* $log(f(S_0))$ is asymptotically negligible
+* and by definition $\hat{a}_t = Y_t - \hat{Y}_t = Y_t - \hat{\phi}_1 Y_{t-1} - \hat{\phi}_2 Y_{t-2}$
+
+Therefore we have that: 
+$$ l(\theta) = -\frac{n}{2} ln(\sigma^2) - \frac{1}{2\sigma^2}\sum_{t=1}^{n} (Y_t - \phi_1 Y_{t-1} - \phi_2 Y_{t-2})^2$$
+We need to set the First Order Equations to zero and solve for our parameters i.e. $\frac{\delta l}{\delta \phi_1} = 0$, $\frac{\delta l}{\delta \phi_1} = 0$, and $\frac{\delta l}{\delta \sigma} = 0$ these equations become quite complicated however. A simpler method is to notice that maximizing $l(\theta)$ is the same as minimizing $\sum a^2_t$
+
+Because $Y_t$ is Gaussian we know that MLE and OLS are asymptotically equivalent therefore:
+
+$$ \begin{bmatrix} (\hat{\phi}_1)_{ML} \\ (\hat{\phi}_2)_{ML} \end{bmatrix} = \begin{bmatrix} (\hat{\phi}_1)_{OLS} \\ (\hat{\phi}_2)_{OLS} \end{bmatrix}$$
+
+
+So we have that:
+
+$$\sqrt{n} \Bigg( \begin{bmatrix} (\hat{\phi}_1)_{ML} \\ (\hat{\phi}_2)_{ML} \end{bmatrix}  - \begin{bmatrix} \phi_1 \\ \phi_2 \end{bmatrix} \Bigg) \overset{asy}{\sim} N\Bigg(\begin{bmatrix} 0 \\ 0 \end{bmatrix} , \begin{bmatrix} 1-\phi_2^2 && - \phi_1(1+\phi_2) \\ - \phi_1(1+\phi_2) &&  1-\phi_2^2  \end{bmatrix} \Bigg) $$
+
+### Problem 5
+_Suppose you estimated the following AR(2) model_:
+
+$$\hat{Y}_t = \underset{(0.0774)}{0.049}Y_{t-1} + \underset{(0.0770)}{0.23}Y_{t-2} + \hat{a}_t, \hspace{0.5cm} n = 164, \hspace{0.5cm} RSS = 0.0000617$$
+_where the figures between brackets are the corresponding standard errors.  Suppose, however, that you are not sure whether the AR(2) model is adequate. You decided to overfit an AR(4) over the same sample and test the null-hypothesis that_ $Y_t$ _follows an AR(2). Let the estimated regression results for fitting the AR(4) model be_
+
+$$\hat{Y}_t = \underset{(0.029)}{0.044}Y_{t-1} + \underset{(0.037)}{0.25}Y_{t-2} + \underset{(0.04)}{0.035}Y_{t-3} + \underset{(0.045)}{0.094}Y_{t-4} + \hat{a}_t, \hspace{0.5cm} n = 164, \hspace{0.5cm} RSS = 0.0000611$$
+_Use the LRT to test, at the 5% significance,_ $H_0 : Y_t \sim AR(2)$ _versus_ $H_1 : Y_t \sim AR(4)$, _and make a decision by either comparing the statistic to the critical value or by computing the p-value of the test._
+
+We need to test that $H_0: AR(2)$ or $H_0: \phi_3 = \phi_4 = 0$ versus $H_1: AR(4)$.
+
+We would like to test against the $\chi^2_{q,test}$ using the Likelihood Ratio Test:
+
+$$LRT_{stat} = n \cdot ln\Bigg(\frac{\hat\sigma^2_{R}}{\hat\sigma^2_{MLE}}\Bigg)$$
+$$q = the \hspace{0.1cm} number \hspace{0.1cm} of \hspace{0.1cm} restrictions = 2$$
+We also have that $R_{q \times p} \Phi_{p \times 1} = r_{q \times 1}$.
+
+Under our $H_0$, the quantity $LRT_{stat} = -2 ln(\Lambda) \overset{asy}{\sim} \chi^2(2)$
+
+Where $\Lambda = \frac{L(\theta_R)|_{\theta_R = \hat\theta_R}}{L(\theta)|_{\theta = \hat\theta}}$, $\hat\theta = \begin{bmatrix} \hat\Phi \\ \hat\sigma^2 \end{bmatrix}$, and $\hat\theta_R = \begin{bmatrix} \hat\Phi_R \\ \hat\sigma_R^2 \end{bmatrix}$
+
+\begin{equation}
+\begin{aligned}
+\Lambda &= \frac{(2\pi \hat\sigma^2_R)^{-n/2} exp\{-\frac{1}{2 \hat\sigma^2_R}\sum a^2_{R_t}\}}{(2\pi \hat\sigma^2)^{-n/2} exp\{-\frac{1}{2 \hat\sigma^2}\sum a^2_{t}\}} ,\hspace{0.1cm} \hat\sigma^2_R = \sum a^2_{R_t} / n,\hspace{0.1cm} \hat\sigma^2 = \sum a^2_t / n\\
+\Lambda &= \Big(\frac{\hat\sigma^2_R}{\hat\sigma^2} \Big)^{-n/2} \\
+\Lambda &= \Big(\frac{RSS_R/n}{RSS/n} \Big)^{-n/2} \\
+\Lambda &= \Big(\frac{RSS_R}{RSS} \Big)^{-n/2} \\
+\end{aligned}
+\end{equation}
+
+Therefore:
+\begin{equation}
+\begin{aligned}
+LRT_{stat} &= -2 (-n/2) ln(RSS_R/RSS) \sim \chi^2(2) \\
+LRT_{stat} &= n ln(RSS_R/RSS) \sim \chi^2(2) \\
+LRT_{stat} &= 164 ln(0.0000617/0.0000611) \sim \chi^2(2) \\
+LRT_{stat} &= 1.602619 \sim \chi^2(2) \\
+\end{aligned}
+\end{equation}
+(
+Our $\chi^2(2)_{crit} \approx 5.991465$ therefore we _do not_ reject our $H_0: \phi_3 = \phi_4 = 0$ because $\chi^2(2)_{stat} < \chi^2(2)_{crit}$ -> $1.602619 < 5.991465$.
+
+### Problem 6
+_Suppose you have the following data pertaining to an AR(3) representation:_
+
+$$\sum Y^2_{t} = 108, \hspace{0.25cm} \sum Y^2_{t-1} = 5, \hspace{0.25cm} \sum Y^2_{t-2} = 55, \hspace{0.25cm} \sum Y^2_{t-3} = 129, \hspace{0.25cm}$$
+$$\sum Y_{t-1}Y_{t-2} = 15, \hspace{0.25cm} \sum Y_{t-1}Y_{t-3} = 25, \hspace{0.25cm} \sum Y_{t-2}Y_{t-3} = 81, \hspace{0.25cm}$$
+$$\sum Y_{t-1}Y_{t} = 20, \hspace{0.25cm} \sum Y_{t-2}Y_{t} = 76, \hspace{0.25cm} \sum Y_{t-3}Y_{t} = 109, \hspace{0.25cm} n = 30$$
+_Test asumptotically the claim that the true model is AR(1) using the LRT test._
+
+Begin by calculating $\Phi = (\sum \bar Y^t \bar Y)^{-1} \sum \bar Y Y_t$: 
+
+$$\Phi = \begin{bmatrix} \hat \phi_1 \\ \hat \phi_2 \\ \hat \phi_3 \end{bmatrix} = \begin{bmatrix} 5 && 15 & &25\\ 15 && 55 && 81 \\ 25 && 81 && 129 \end{bmatrix}^{-1} \begin{bmatrix} 20 \\ 76 \\ 109 \end{bmatrix} = \begin{bmatrix} 4 \\ 2.5 \\ -1.5 \end{bmatrix}$$
+Then we can calculate the unrestricted RSS given by:
+
+$$RSS_U = \sum \hat a^2_t = \sum Y^2_t - \hat \Phi^T ( \sum \bar Y Y_t) = 108 -  \begin{bmatrix} 4 && 2.5 & & -1.5\\ \end{bmatrix} \begin{bmatrix} 20 \\ 76 \\ 109 \end{bmatrix} =  108 - 106.5 = 1.5$$
+
+
+
+Next using $R = \begin{bmatrix} 0 && 1 && 0 \\ 0 && 0 && 1\end{bmatrix}$ and $r = \begin{bmatrix} 0\\0 \end{bmatrix}$ we can calculate our restricted model's Phi's using:
+
+$$ \hat \Phi_R = \hat \Phi + (\sum \bar Y^T \bar Y)^{-1} R^T (R (\sum \bar Y^T \bar Y)^{-1} R^T)^{-1} (r - R\Phi) = \begin{bmatrix} 4 \\ 0 \\ 0\end{bmatrix}$$
+
+I calculated $\hat{\phi}_R$ in R using ```Phi + solve(X) %*% t(R) %*% solve(R %*% solve(X) %*% t(R)) %*% (r - R %*% Phi)``` to get approximately $\hat{\phi}_R =\begin{bmatrix} 4 \\ 0 \\ 0\end{bmatrix}$
+
+Next we calculate (in R) our restricted model's RSS using the following:
+
+$$RSS_R = RSS + (\hat \Phi - \hat\Phi_R)^T (\sum \bar Y \bar Y^T) (\hat \Phi - \hat \Phi_R) = 28 $$
+
+Finally,
+
+$$LRT_{stat} = n \cdot ln(\frac{\sigma^2_R}{\sigma^2}) = 30 ln(\frac{RSS_R}{RSS}) = 30 ln(\frac{28}{1.5}) \approx 87.80218 \sim \chi^2(2)$$
+Since $LRT_{stat} > LRT_{crit}$ we reject the null hypothesis that $H_0: \phi_2 = \phi_3 = 0$
+
+
+## 2 Practicum
+
+_Use the seasonally adjusted series you worked with on Assignment 1 to perform the following tasks: Construct a measure of the business cycle_ $Y_t$ _using the Trend Stationary approach and for an AR(p) process using both the BIC(k) and AIC(k) to estimate_ $p$.  _Include standard errors in brackets under you estimates of_ $\hat{\phi}_j$, _and provide an astimate of $\sigma$. Perform a likelihood ratio test at the 5% level of_
+
+$H_0 : Y_t \sim AR(p)$ _versus_ $H_1 : Y_t \sim AR(p+2)$ 
+
+_where_ $p$ _is chosen from the BIC(k). Calculate the p-value of the test statistic. From the estimated AR(p) model calculate_ $\gamma(0)^{1/2}$.  _Also calculate 1) the infinite moving average weights_ $\psi_k$, _2) the autocorrelations_ $\rho(k)$, _3) the forecasts_ $E_T [Y_{T+k}]$, _and 4) the confidence intervals for the forecasts for_ $k = 0,1,2,3,4,5,6$. _Do not just give numbers but explain how you made your calculations.  Put your calculations in one easy-to-read table. (This is a good practice on writing your report.)_  
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+library(xlsx)
+library(dplyr)
+CPE_Cons_Goods  <- read.xlsx("CONS_Canada.xls", sheetName = "Sheet3")
+CPE_Cons_Goods <- CPE_Cons_Goods %>% mutate(X_t = log(Seasonally.Adjusted))
+CPE_Cons_Goods <- CPE_Cons_Goods[complete.cases(CPE_Cons_Goods),]
+model.CPE <- lm(X_t ~ seq_along(CPE_Cons_Goods$X_t) , data = CPE_Cons_Goods)
+
+# Yt is the residuals of regression
+Y_t <- residuals(model.CPE)
+
+```
+
+When running our AR(p) model fits for p={0,..,9} we find that the optimal model according to both AIC and BIC, is an AR(4) model:
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+## Defining your own AIC + BIC function rather than using R's.
+AIC <- function(res, k, N){
+  aic <-log(sum(res^2) / N)
+  aic <- aic + 2 * k /N
+  aic
+}
+
+BIC <- function(res, k, N){
+  bic <-log(sum(res^2) / N)
+  bic <- bic +  k *log(N)/N
+  bic
+}
+
+
+#obtaining the aic and bic
+aic.array = rep(NA, 10)
+bic.array = rep(NA, 10)
+N = length(Y_t)
+for(ii in 0:9) {
+  model.arima = arima(Y_t, order = c(ii, 0, 0), include.mean=FALSE) # AR(ii) model
+  res.arima = model.arima$residuals
+  aic.array[ii + 1] = AIC(res.arima, ii, N)
+  bic.array[ii + 1] = BIC(res.arima, ii, N)
+}
+
+which(aic.array == min(aic.array))-1
+which(bic.array == min(bic.array))-1
+```
+Our lag 4 model results including standard errors:
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+model.arima = arima(Y_t, order = c(which(aic.array == min(aic.array))-1, 0, 0), include.mean=FALSE)
+model.arima
+```
+$$\underset{(s.e.)}{\hat{Y}_t} = \underset{(0.0711)}{\hat{\phi_1}} Y_{t-1} + \underset{(0.1006)}{\hat{\phi_2}} Y_{t-2} + \underset{(0.1009)}{\hat{\phi_3}} Y_{t-3} + \underset{(0.0720)}{\hat{\phi_4}} Y_{t-4} = 0.9669 Y_{t-1} + 0.1874 Y_{t-2} + 0.0925 Y_{t-3} - 0.2563 Y_{t-4}$$
+An estimate for $\hat\sigma$ is given by summing the squared residuals and dividing by the length of our data:
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+sigma.hat = sum(model.arima$residuals^2)/N
+print("sigma^2:")
+sigma.hat
+print("sigma:")
+sqrt(sigma.hat)
+```
+
+#### Likelihood Ratio Test
+We next want to do a comparison using the Likelihood Ratio Test for an $AR(4)$ versus $AR(6)$.
+ 
+Therefore $H_0: AR(2)$ or $H_0: \phi_5 = \phi_6 = 0$ and $H_1: AR(6)$
+ 
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+model.arima.a <- arima(Y_t, order = c(6, 0, 0), include.mean=FALSE)
+sigma.hat.a <- sum(model.arima.a$residuals^2)/N
+print("chi-statistic")
+Chi_2 = N * log(sigma.hat / sigma.hat.a)
+Chi_2
+print("p-value for test")
+pval_2 = 1- pchisq(Chi_2, 2)
+pval_2
+```
+
+with a p-value = 0.333717, we *do not* reject the null hypothesis that $H_0: \phi_5 = \phi_6 = 0$
+
+#### Summary AIC & BIC Table
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# Puttng AIC/BIC into a table
+AIC_table <- data.frame(cbind(c(0:9),aic.array,bic.array))
+rownames(AIC_table) <- c()
+colnames(AIC_table) <- c("p", "AIC","BIC")
+round(AIC_table, digits=2)
+
+```
+
+#### The value of $\gamma(0)^{1/2}$
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+estimates <-  model.arima$coef # Estimates from AR(X) model. Find X with AIC/BIC
+rhos <- ARMAacf(estimates,lag.max= 4) ### REPLACE 0 WITH X
+## Extracting the theoretical acf values for k=0,..,X. 
+phi <- model.arima$coef ### equal to AR(X) model coefficients -> phi hats
+gamma0 <- (sigma.hat / (1 - phi %*% rhos[-1])) ### gamma0, fill in '...'
+sqrt(gamma0)
+```
+
+#### 1) Calculate the Infinite Moving Average Weights
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# calucluating psi's, the infinite MA weights
+psis <- rep(NA,7)
+psis[1] <- 1
+psis[2] <- phi[1]
+psis[3] <- phi[1] * psis[2] + phi[2]
+psis[4] <- phi[1] * psis[3] + phi[2] * psis[2] + psis[1] * phi[3]
+j = 5
+(j-1):-1:(j-4)
+for( j in 5:7) {
+  psis[j] <- psis[(j-1):-1:(j-4)] %*% phi
+}
+```
+The $\psi_k$'s are calculated using the following formulas: 
+$\psi_0 = 1$
+$\psi_1 = \phi_1 \psi_{0}$
+$\psi_2 = \phi_1 \psi_{1} + \phi_2 \psi_0$
+$\psi_3 = \phi_1 \psi_{2} + \phi_2 \psi_1 + \phi_3 \psi_0$
+$\psi_4 = \phi_1 \psi_{3} + \phi_2 \psi_2 + \phi_3 \psi_1 + \phi_4 \psi_0$
+$\psi_5 = \phi_1 \psi_{4} + \phi_2 \psi_3 + \phi_3 \psi_2 + \phi_4 \psi_1$
+$\psi_6 = \phi_1 \psi_{5} + \phi_2 \psi_4 + \phi_3 \psi_3 + \phi_4 \psi_2$
+
+#### 2) Calculate the Autocorrelations $\rho(k)$
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+rhos <- ARMAacf(estimates,lag.max= 6)
+rhos
+```
+Our $\rho_k$ are taken directly from the `ARMAacf(estimates,lag.max= 6)` function output.
+
+#### 3) Calculate the forecasts $E_T[Y_{T+k}]$
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+lastYt <- Y_t[length(Y_t)]
+lastYt
+Etk <- rep(NA,7)
+Etk[1] <- lastYt
+Etk[2] <- phi[1] * Y_t[length(Y_t)] + phi[2] * Y_t[length(Y_t)-1] + phi[3] * Y_t[length(Y_t)-2] + phi[4]*Y_t[length(Y_t)-3]
+Etk[3] <- phi[1] * Etk[2] + phi[2] * Etk[1] + phi[3] * Y_t[length(Y_t)-1] + phi[4]*Y_t[length(Y_t)-2]
+Etk[4] <- phi[1] * Etk[3] + phi[2] * Etk[2] + phi[3] * Etk[1] + phi[4]*Y_t[length(Y_t)-1]
+Etk[5] <- phi[1] * Etk[4] + phi[2] * Etk[3] + phi[3] * Etk[2] + phi[4]*Etk[1]
+Etk[6] <- phi[1] * Etk[5] + phi[2] * Etk[4] + phi[3] * Etk[3] + phi[4]*Etk[2]
+Etk[7] <- phi[1] * Etk[6] + phi[2] * Etk[5] + phi[3] * Etk[4] + phi[4]*Etk[3]
+```
+We have an $AR(4)$ model, so to calculate $E_T[Y_{T+k}]$ we used the following formula $E_T[Y_{T+k}] =  \phi_1 Y_{T+k-1} + \phi_2 Y_{T+k-2} + \phi_3 Y_{T+k-3} + \phi_4 Y_{T+k-4}$ for $Y_T=Y_{186:191}$ and we already know $Y_{T=185}$ so we did not need to calculate for $k=0$, because $E_T[Y_{185}]$  is given.
+
+#### 4) Calculate the confidence intervals for the forecasts for $k = 0, 1, 2, 3, 4, 5, 6$ 
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+varEtk <- rep(NA,7)
+
+for(j in 1:7){
+## varEtk[j] = sigma.hat * sum(psis^2 to j)
+  varEtk[j] = sigma.hat * sum(psis[1:j]^2)
+  }
+
+EtkCIlow <- rep(NA,7)
+EtkCIhigh <- rep(NA,7)
+### fill in (using a for loop recommended)
+for(j in 1:7){
+  EtkCIlow[j] <- Etk[j] - 2 * sqrt(varEtk[j])
+  EtkCIhigh[j] <- Etk[j] + 2 * sqrt(varEtk[j])
+}
+
+```
+
+To calculate the Confidence Intervals for the forecasts $k=0,...,6$ we need to:
+
+1) Calculate $var(E_T[Y_{T+k}]) = \hat\sigma^2 \cdot \sum_{j=1}^{k} \psi_j^2$ for each $k$
+2) Calculate the lower bound using $E_T[Y_{T+k}] - 2\sqrt{var(E_T[Y_{T+k}])}$
+3) Calculate the upper bound using $E_T[Y_{T+k}] + 2\sqrt{var(E_T[Y_{T+k}])}$
+
+#### Summary Data
+All of the above four sets of calculations are summarized in the table below:
+```{r summary, warning=FALSE, message=FALSE, echo=FALSE}
+library(knitr)
+summaryData <- round(data.frame(k=0:6, Infinite_Moving_Average_Weights= psis, Autocorrelation = c(rhos), Forecasts = Etk, Lower_CI =  EtkCIlow, Upper_CI = EtkCIhigh),3)
+kable(summaryData)
+```
+
+
+
+## Appendix Code
+```{r appendixCode, eval=FALSE}
+
+library(xlsx)
+library(dplyr)
+CPE_Cons_Goods  <- read.xlsx("CONS_Canada.xls", sheetName = "Sheet3")
+CPE_Cons_Goods <- CPE_Cons_Goods %>% mutate(X_t = log(Seasonally.Adjusted))
+CPE_Cons_Goods <- CPE_Cons_Goods[complete.cases(CPE_Cons_Goods),]
+model.CPE <- lm(X_t ~ seq_along(CPE_Cons_Goods$X_t) , data = CPE_Cons_Goods)
+
+# Yt is the residuals of regression
+Y_t <- residuals(model.CPE)
+
+## Defining your own AIC + BIC function rather than using R's.
+AIC <- function(res, k, N){
+  aic <-log(sum(res^2) / N)
+  aic <- aic + 2 * k /N
+  aic
+}
+
+BIC <- function(res, k, N){
+  bic <-log(sum(res^2) / N)
+  bic <- bic +  k *log(N)/N
+  bic
+}
+
+
+#obtaining the aic and bic
+aic.array = rep(NA, 10)
+bic.array = rep(NA, 10)
+N = length(Y_t)
+for(ii in 0:9) {
+  model.arima = arima(Y_t, order = c(ii, 0, 0), include.mean=FALSE) # AR(ii) model
+  res.arima = model.arima$residuals
+  aic.array[ii + 1] = AIC(res.arima, ii, N)
+  bic.array[ii + 1] = BIC(res.arima, ii, N)
+}
+
+which(aic.array == min(aic.array))-1
+which(bic.array == min(bic.array))-1
+
+
+model.arima = arima(Y_t, order = c(which(aic.array == min(aic.array))-1, 0, 0), include.mean=FALSE)
+model.arima
+
+
+sigma.hat = sum(model.arima$residuals^2)/N
+print("sigma^2:")
+sigma.hat
+print("sigma:")
+sqrt(sigma.hat)
+
+
+model.arima.a <- arima(Y_t, order = c(6, 0, 0), include.mean=FALSE)
+sigma.hat.a <- sum(model.arima.a$residuals^2)/N
+print("chi-statistic")
+Chi_2 = N * log(sigma.hat / sigma.hat.a)
+Chi_2
+print("p-value for test")
+pval_2 = 1- pchisq(Chi_2, 2)
+pval_2
+
+
+# Puttng AIC/BIC into a table
+AIC_table <- data.frame(cbind(c(0:9),aic.array,bic.array))
+rownames(AIC_table) <- c()
+colnames(AIC_table) <- c("p", "AIC","BIC")
+round(AIC_table, digits=2)
+
+
+estimates <-  model.arima$coef # Estimates from AR(X) model. Find X with AIC/BIC
+rhos <- ARMAacf(estimates,lag.max= 4) ### REPLACE 0 WITH X
+## Extracting the theoretical acf values for k=0,..,X. 
+phi <- model.arima$coef ### equal to AR(X) model coefficients -> phi hats
+gamma0 <- (sigma.hat^2 / (1 - phi %*% rhos[-1])) ### gamma0, fill in '...'
+sqrt(gamma0)
+
+#### 1) Calculate the Infinite Moving Average Weights
+
+# calucluating psi's, the infinite MA weights
+psis <- rep(NA,7)
+psis[1] <- 1
+psis[2] <- phi[1]
+psis[3] <- phi[1] * psis[2] + phi[2]
+psis[4] <- phi[1] * psis[3] + phi[2] * psis[2] + psis[1] * phi[3]
+j = 5
+(j-1):-1:(j-4)
+for( j in 5:7) {
+  psis[j] <- psis[(j-1):-1:(j-4)] %*% phi
+}
+
+#### 2) Calculate the Autocorrelations $\rho(k)$
+rhos
+
+#### 3) Calculate the forecasts $E_T[Y_{T+k}]$
+lastYt <- Y_t[length(Y_t)]
+lastYt
+Etk <- rep(NA,7)
+Etk[1] <- lastYt
+Etk[2] <- phi[1] * Y_t[length(Y_t)] + phi[2] * Y_t[length(Y_t)-1] + phi[3] * Y_t[length(Y_t)-2] + phi[4]*Y_t[length(Y_t)-3]
+Etk[3] <- phi[1] * Etk[2] + phi[2] * Etk[1] + phi[3] * Y_t[length(Y_t)-1] + phi[4]*Y_t[length(Y_t)-2]
+Etk[4] <- phi[1] * Etk[3] + phi[2] * Etk[2] + phi[3] * Etk[1] + phi[4]*Y_t[length(Y_t)-1]
+Etk[5] <- phi[1] * Etk[4] + phi[2] * Etk[3] + phi[3] * Etk[2] + phi[4]*Etk[1]
+Etk[6] <- phi[1] * Etk[5] + phi[2] * Etk[4] + phi[3] * Etk[3] + phi[4]*Etk[2]
+Etk[7] <- phi[1] * Etk[6] + phi[2] * Etk[5] + phi[3] * Etk[4] + phi[4]*Etk[3]
+
+#### 4) Calculate the confidence intervals for the forecasts for $k = 0, 1, 2, 3, 4, 5, 6$ 
+varEtk <- rep(NA,7)
+psis
+for(j in 1:7){
+## varEtk[j] = sigma.hat * sum(psis^2 to j)
+  varEtk[j] = sigma.hat * sum(psis[1:j]^2)
+  }
+
+EtkCIlow <- rep(NA,7)
+EtkCIhigh <- rep(NA,7)
+### fill in (using a for loop recommended)
+for(j in 1:7){
+  EtkCIlow[j] <- Etk[j] - 2 * sqrt(varEtk[j])
+  EtkCIhigh[j] <- Etk[j] + 2 * sqrt(varEtk[j])
+}
+
+#### Summary Data
+summaryData <- data.frame(k=0:6, Infinite_Moving_Average_Weights= psis, Autocorrelation = c(rhos, NA, NA), Forecasts = Etk, Lower_CI =  EtkCIlow, Upper_CI = EtkCIhigh)
+summaryData
+
+```
